@@ -1,0 +1,13 @@
+// Zasady sprawdzania plików Markdown (używane przez GitHub Actions).
+{
+  "config": {
+    "default": true,
+    "MD013": false, // długość linii – nie sprawdzamy
+    "MD033": false, // HTML w Markdownie – dozwolony
+    "MD034": false, // zwykłe adresy URL – dozwolone
+    "MD040": false, // język bloku kodu – nie jest wymagany
+    "MD041": false, // pierwsza linia nie musi być nagłówkiem
+    "MD024": { "siblings_only": true } // te same nagłówki tylko w różnych sekcjach
+  },
+  "ignores": ["node_modules", "**/node_modules", "materialy"]
+}

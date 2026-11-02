@@ -1,0 +1,25 @@
+# Automatyczne sprawdzenie projektu przy każdym pull requeście.
+# Zielony znaczek jest warunkiem scalenia zmian do gałęzi main.
+name: Sprawdzenie projektu
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sprawdzenie:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pobranie kodu
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Struktura projektu
+        run: bash .github/sprawdzenie.sh
+
+      - name: Poprawność plików Markdown
+        run: npx --yes markdownlint-cli2@0.23.3 "**/*.md"
