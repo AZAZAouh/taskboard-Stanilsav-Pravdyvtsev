@@ -12,16 +12,7 @@ Aplikacja do zarządzania tablicami i zadaniami, tworzona w ramach praktyk
 
 1. Włącz Apache i MySQL w XAMPP
 2. Odtwórz bazę i utwórz konta zgodnie z instrukcją w sekcji „Baza danych”
-3. W głównym katalogu projektu utwórz plik `.env`
-
-   ```dotenv
-   DB_HOST=127.0.0.1
-   DB_USER=taskboard_app
-   DB_PASSWORD=twoje_lokalne_haslo
-   DB_NAME=taskboard
-   ```
-
-   Wpisz hasło ustawione dla `taskboard_app` w MariaDB i trzymaj plik `.env` lokalnie
+3. Skopiuj plik `.env.example` do `.env` i uzupełnij dane połączenia z bazą
 
 4. W PowerShell przejdź do katalogu `backend` i uruchom serwer
 
