@@ -69,4 +69,32 @@ router.delete('/:id', async (req, res, next) => {
   }
 });
 
+router.get('/:boardId/tasks', async (req, res, next) => {
+  const boardId = Number(req.params.boardId);
+
+  if (!Number.isSafeInteger(boardId) || boardId < 1) {
+    return res.status(404).json({ error: 'Nie znaleziono tablicy' });
+  }
+
+  try {
+    const [rows] = await pool.execute(
+      `SELECT t.id, t.title, t.description, t.status, t.priority,
+              t.deadline, t.boardId, t.assigneeId, t.createdAt
+       FROM boards b
+       LEFT JOIN tasks t ON t.boardId = b.id AND t.isDeleted = 0
+       WHERE b.id = ? AND b.isDeleted = 0
+       ORDER BY t.id`,
+      [boardId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Nie znaleziono tablicy' });
+    }
+
+    res.json(rows[0].id === null ? [] : rows);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
