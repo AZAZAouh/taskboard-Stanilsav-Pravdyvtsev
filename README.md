@@ -1,38 +1,92 @@
 # TaskBoard
 
-TaskBoard to projekt aplikacji do zarządzania zadaniami.
-Aplikacja powstaje w ramach praktyk i jest obecnie na etapie przygotowania struktury.
+Aplikacja do zarządzania tablicami i zadaniami, tworzona w ramach praktyk
 
 ## Technologie
 
-Planowane technologie to HTML, CSS, JavaScript, PHP i baza danych.
-Szczegóły będą uzupełniane w trakcie rozwoju projektu.
-
-## Wymagane środowisko
-
+- Node.js i Express
+- MariaDB w XAMPP
 - Git
-- Visual Studio Code
-- XAMPP
-- Node.js
 
 ## Uruchomienie
 
-Projekt jest na wczesnym etapie. Instrukcja uruchomienia zostanie uzupełniona po przygotowaniu aplikacji.
+1. Włącz Apache i MySQL w XAMPP
+2. Odtwórz bazę i utwórz konta zgodnie z instrukcją w sekcji „Baza danych”
+3. W głównym katalogu projektu utwórz plik `.env`
+
+   ```dotenv
+   DB_HOST=127.0.0.1
+   DB_USER=taskboard_app
+   DB_PASSWORD=twoje_lokalne_haslo
+   DB_NAME=taskboard
+   ```
+
+   Wpisz hasło ustawione dla `taskboard_app` w MariaDB i trzymaj plik `.env` lokalnie
+
+4. W PowerShell przejdź do katalogu `backend` i uruchom serwer
+
+   ```powershell
+   cd backend
+   npm.cmd ci
+   npm.cmd start
+   ```
+
+5. Otwórz `http://127.0.0.1:3000/api/health` i sprawdź, czy serwer zwraca `{"ok":true}`
 
 ## Struktura projektu
 
-| Folder | Za co odpowiada |
+| Katalog | Zawartość |
 | --- | --- |
 | `frontend/` | Interfejs użytkownika |
-| `backend/` | Logika serwerowa |
-| `database/` | Pliki bazy danych |
-| `docs/` | Dokumentacja projektu |
+| `backend/` | Serwer i trasy API |
+| `database/` | Pliki SQL i kopia zapasowa |
 | `docs/zadania/` | Treści zadań z praktyk |
-| `materialy/` | Materiały udostępnione przez prowadzącego |
+| `materialy/` | Materiały od prowadzącego |
 
-## Materiały
+## API
 
-Materiały do praktyk znajdują się w folderze `materialy/`.
+| Metoda | Adres | Działanie |
+| --- | --- | --- |
+| GET | `/api/boards` | Lista aktywnych tablic |
+| POST | `/api/boards` | Dodanie tablicy |
+| DELETE | `/api/boards/:id` | Miękkie usunięcie tablicy |
+| GET | `/api/boards/:boardId/tasks` | Lista aktywnych zadań tablicy |
+| GET | `/api/tasks/:id` | Szczegóły zadania |
+| POST | `/api/tasks` | Dodanie zadania |
+| PUT | `/api/tasks/:id` | Edycja zadania |
+| DELETE | `/api/tasks/:id` | Miękkie usunięcie zadania |
+| GET | `/api/users` | Lista użytkowników bez `passwordHash` |
+
+Tytuł zadania musi mieć od 3 do 100 znaków po obcięciu spacji. Statusy to `todo`, `in_progress` i `done`, a priorytety to `low`, `medium` i `high`. Domyślny status to `todo`
+
+Termin można zostawić pusty lub podać w formacie `RRRR-MM-DD`. Zadanie musi należeć do aktywnej tablicy. Jeśli podano wykonawcę, musi on istnieć w bazie
+
+## Baza danych
+
+| Tabela | Dane i relacje |
+| --- | --- |
+| `users` | Dane użytkowników i hashe haseł |
+| `boards` | Tablice. Pole `ownerId` wskazuje właściciela w `users` |
+| `tasks` | Zadania. Pole `boardId` wskazuje tablicę w `boards`, a opcjonalne `assigneeId` wskazuje wykonawcę w `users` |
+
+Tablice i zadania są usuwane miękko. Rekord zostaje w bazie z `isDeleted = 1` i datą w `deletedAt`. Listy zwracane przez API pomijają takie rekordy
+
+### Odtworzenie bazy
+
+1. Utwórz bazę `taskboard` w phpMyAdmin
+2. Zaimportuj `database/backup/taskboard.sql`
+3. W lokalnej kopii `database/konta.sql` zastąp przykładowe hasła własnymi i uruchom skrypt jako administrator bazy
+4. Wpisz dane konta `taskboard_app` w pliku `.env`
+
+### Sprawdzenie kopii zapasowej
+
+Kopię odtworzyłem w bazie `taskboard_test`. Liczba rekordów sprawdzona przez `SELECT COUNT(*)` zgadzała się we wszystkich tabelach
+
+| Tabela | `taskboard` | `taskboard_test` |
+| --- | ---: | ---: |
+| `users` | 5 | 5 |
+| `boards` | 3 | 3 |
+| `tasks` | 2 | 2 |
 
 ## Autor
 
