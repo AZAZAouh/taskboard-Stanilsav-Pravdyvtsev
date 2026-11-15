@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Ноя 13 2026 г., 17:26
+-- Время создания: Ноя 15 2026 г., 19:41
 -- Версия сервера: 10.4.32-MariaDB
 -- Версия PHP: 8.2.12
 
@@ -74,7 +74,15 @@ CREATE TABLE `tasks` (
 
 INSERT INTO `tasks` (`id`, `title`, `description`, `status`, `priority`, `deadline`, `boardId`, `assigneeId`, `createdAt`, `isDeleted`, `deletedAt`, `deletedById`) VALUES
 (1, 'Test API zadan', NULL, 'todo', 'medium', NULL, 3, NULL, '2026-11-13 17:08:47', 0, NULL, NULL),
-(2, 'Test CRUD po zmianie', NULL, 'done', 'high', NULL, 3, NULL, '2026-11-13 17:19:51', 1, '2026-11-13 17:19:52', NULL);
+(2, 'Test CRUD po zmianie', NULL, 'done', 'high', NULL, 3, NULL, '2026-11-13 17:19:51', 1, '2026-10-15 19:39:36', NULL),
+(3, 'Test Postman po zmianie', NULL, 'done', 'high', NULL, 3, NULL, '2026-11-13 18:33:34', 1, '2026-11-13 18:33:35', NULL),
+(4, 'Przygotować makietę tablicy', NULL, 'todo', 'high', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(5, 'Dodać formularz zadania', NULL, 'in_progress', 'high', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(6, 'Sprawdzić listę użytkowników', NULL, 'done', 'medium', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(7, 'Dodać filtrowanie zadań', NULL, 'todo', 'medium', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(8, 'Sprawdzić walidację tytułu', NULL, 'done', 'low', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(9, 'Przygotować opis projektu', NULL, 'in_progress', 'low', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(10, 'Sprawdzić edycję zadania', NULL, 'done', 'medium', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -144,7 +152,7 @@ ALTER TABLE `boards`
 -- AUTO_INCREMENT для таблицы `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT для таблицы `users`
