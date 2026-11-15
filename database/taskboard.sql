@@ -1,11 +1,15 @@
+DROP DATABASE IF EXISTS taskboard;
+CREATE DATABASE taskboard CHARACTER SET utf8mb4 COLLATE utf8mb4_polish_ci;
+USE taskboard;
+
 -- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Lis 09, 2026 at 12:45 PM
--- Wersja serwera: 10.4.32-MariaDB
--- Wersja PHP: 8.2.12
+-- Хост: 127.0.0.1
+-- Время создания: Ноя 15 2026 г., 19:41
+-- Версия сервера: 10.4.32-MariaDB
+-- Версия PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,13 +22,13 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `taskboard`
+-- База данных: `taskboard`
 --
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `boards`
+-- Структура таблицы `boards`
 --
 
 CREATE TABLE `boards` (
@@ -39,17 +43,55 @@ CREATE TABLE `boards` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `boards`
+-- Дамп данных таблицы `boards`
 --
 
 INSERT INTO `boards` (`id`, `name`, `description`, `ownerId`, `createdAt`, `isDeleted`, `deletedAt`, `deletedById`) VALUES
 (3, 'Aplikacja TaskBoard', 'Nowy opis', 1, '2026-11-09 10:34:04', 0, NULL, NULL),
-(4, 'organizacja praktyk', NULL, 2, '2026-11-09 10:34:04', 1, '2026-11-09 12:04:46', 1);
+(4, 'organizacja praktyk', NULL, 2, '2026-11-09 10:34:04', 1, '2026-11-09 12:04:46', 1),
+(5, 'Test DELETE', NULL, 1, '2026-11-13 16:57:58', 1, '2026-11-13 16:57:59', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Struktura tabeli dla tabeli `users`
+-- Структура таблицы `tasks`
+--
+
+CREATE TABLE `tasks` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `title` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('todo','in_progress','done') NOT NULL DEFAULT 'todo',
+  `priority` enum('low','medium','high') NOT NULL,
+  `deadline` date DEFAULT NULL,
+  `boardId` int(10) UNSIGNED NOT NULL,
+  `assigneeId` int(10) UNSIGNED DEFAULT NULL,
+  `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
+  `isDeleted` tinyint(1) NOT NULL DEFAULT 0,
+  `deletedAt` datetime DEFAULT NULL,
+  `deletedById` int(10) UNSIGNED DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
+
+--
+-- Дамп данных таблицы `tasks`
+--
+
+INSERT INTO `tasks` (`id`, `title`, `description`, `status`, `priority`, `deadline`, `boardId`, `assigneeId`, `createdAt`, `isDeleted`, `deletedAt`, `deletedById`) VALUES
+(1, 'Test API zadan', NULL, 'todo', 'medium', NULL, 3, NULL, '2026-11-13 17:08:47', 0, NULL, NULL),
+(2, 'Test CRUD po zmianie', NULL, 'done', 'high', NULL, 3, NULL, '2026-11-13 17:19:51', 1, '2026-10-15 19:39:36', NULL),
+(3, 'Test Postman po zmianie', NULL, 'done', 'high', NULL, 3, NULL, '2026-11-13 18:33:34', 1, '2026-11-13 18:33:35', NULL),
+(4, 'Przygotować makietę tablicy', NULL, 'todo', 'high', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(5, 'Dodać formularz zadania', NULL, 'in_progress', 'high', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(6, 'Sprawdzić listę użytkowników', NULL, 'done', 'medium', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(7, 'Dodać filtrowanie zadań', NULL, 'todo', 'medium', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(8, 'Sprawdzić walidację tytułu', NULL, 'done', 'low', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(9, 'Przygotować opis projektu', NULL, 'in_progress', 'low', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
+(10, 'Sprawdzić edycję zadania', NULL, 'done', 'medium', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `users`
 --
 
 CREATE TABLE `users` (
@@ -62,7 +104,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `users`
+-- Дамп данных таблицы `users`
 --
 
 INSERT INTO `users` (`id`, `login`, `passwordHash`, `firstName`, `lastName`, `createdAt`) VALUES
@@ -73,11 +115,11 @@ INSERT INTO `users` (`id`, `login`, `passwordHash`, `firstName`, `lastName`, `cr
 (5, 'kasia.lewandowska', '$2a$10$qCgFwKm4Qiu60z3cTqCvz.DZUvPNVnkJQjMagc4wtx24LiYjsF./y', 'Kasia', 'Lewandowska', '2026-11-09 10:42:05');
 
 --
--- Indeksy dla zrzutów tabel
+-- Индексы сохранённых таблиц
 --
 
 --
--- Indeksy dla tabeli `boards`
+-- Индексы таблицы `boards`
 --
 ALTER TABLE `boards`
   ADD PRIMARY KEY (`id`),
@@ -85,38 +127,61 @@ ALTER TABLE `boards`
   ADD KEY `deletedById` (`deletedById`);
 
 --
--- Indeksy dla tabeli `users`
+-- Индексы таблицы `tasks`
+--
+ALTER TABLE `tasks`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `boardId` (`boardId`),
+  ADD KEY `assigneeId` (`assigneeId`),
+  ADD KEY `deletedById` (`deletedById`);
+
+--
+-- Индексы таблицы `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `login` (`login`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT для сохранённых таблиц
 --
 
 --
--- AUTO_INCREMENT for table `boards`
+-- AUTO_INCREMENT для таблицы `boards`
 --
 ALTER TABLE `boards`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT для таблицы `tasks`
+--
+ALTER TABLE `tasks`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT для таблицы `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- Constraints for dumped tables
+-- Ограничения внешнего ключа сохраненных таблиц
 --
 
 --
--- Constraints for table `boards`
+-- Ограничения внешнего ключа таблицы `boards`
 --
 ALTER TABLE `boards`
   ADD CONSTRAINT `boards_ibfk_1` FOREIGN KEY (`ownerId`) REFERENCES `users` (`id`),
   ADD CONSTRAINT `boards_ibfk_2` FOREIGN KEY (`deletedById`) REFERENCES `users` (`id`);
+
+--
+-- Ограничения внешнего ключа таблицы `tasks`
+--
+ALTER TABLE `tasks`
+  ADD CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`boardId`) REFERENCES `boards` (`id`),
+  ADD CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`assigneeId`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`deletedById`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
