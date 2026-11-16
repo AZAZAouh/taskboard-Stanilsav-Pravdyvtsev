@@ -153,10 +153,11 @@ router.delete('/:id', async (req, res, next) => {
   }
 
   try {
-    const [result] = await pool.execute(
-      'UPDATE tasks SET isDeleted = 1, deletedAt = NOW() WHERE id = ? AND isDeleted = 0',
-      [id]
-    );
+   const [result] = await pool.query(
+  'UPDATE tasks SET isDeleted = 1, deletedAt = NOW(), deletedById = ? WHERE id = ? AND isDeleted = 0',
+  [req.session.userId, id]
+);
+  
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Nie znaleziono zadania' });

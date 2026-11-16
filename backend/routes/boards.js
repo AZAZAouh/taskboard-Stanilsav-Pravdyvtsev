@@ -32,13 +32,13 @@ router.post('/', async (req, res, next) => {
     });
   }
 
-  const ownerId = 1;
+  const ownerId = req.session.userId;
 
   try {
-    const [result] = await pool.execute(
-      'INSERT INTO boards (name, description, ownerId) VALUES (?, ?, ?)',
-      [name, description, ownerId]
-    );
+    const [result] = await pool.query(
+  'UPDATE boards SET isDeleted = 1, deletedAt = NOW(), deletedById = ? WHERE id = ? AND isDeleted = 0',
+  [req.session.userId, req.params.id]
+);
 
     res.status(201).json({ id: result.insertId, name });
   } catch (err) {
