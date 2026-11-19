@@ -26,3 +26,84 @@ Testy wykonujemy w Postmanie. W kolumnie „Wynik” wpisujemy „Zgodny” lub 
 | T-18 | Zmiana nieistniejącego zadania | Po zalogowaniu wysłać `PUT /api/tasks/:id` z poprawnymi danymi i ID zadania, którego nie ma w bazie | `404`, komunikat o braku zadania | — |
 | T-19 | Usunięcie zadania testowego | Po zalogowaniu wysłać `DELETE /api/tasks/:id` z ID z T-13 | `204`, zadanie usunięte miękko | — |
 | T-20 | Ponowne usunięcie zadania | Po T-19 ponowić `DELETE /api/tasks/:id` z tym samym ID | `404`, komunikat o braku zadania | — |
+
+## Sprawdzenie TB-3 — 19.11.2026
+
+Poniższe scenariusze wykonano automatycznie w Chrome na lokalnym serwerze i bazie. Utworzono osobną tablicę testową, a po sprawdzeniu przeniesiono ją do usuniętych. Wyniki wcześniejszej tabeli pochodzą z poprzedniego etapu pracy.
+
+| ID | Scenariusz | Kroki | Oczekiwany wynik | Wynik |
+| --- | --- | --- | --- | --- |
+| UI-01 | Logowanie w przeglądarce | Wpisać dane `anna.nowak`, wysłać formularz | Przejście do listy tablic | Zgodny |
+| UI-02 | Utworzenie tablicy przez API | POST z nazwą i opisem po zalogowaniu | 201 i ID tablicy | Zgodny |
+| UI-03 | Utworzenie zadania z osobą | POST z tytułem, priorytetem high i assigneeId=1 | 201 i ID zadania | Zgodny |
+| UI-04 | Trzy filtry razem | GET z priority=high, assigneeId=1 i q=filtr | Jedno pasujące zadanie testowe | Zgodny |
+| UI-05 | Wykluczenie przez filtr | Zmienić priority na low przy tych samych filtrach | Pusta lista | Zgodny |
+| UI-06 | Błędna osoba w filtrze | GET z assigneeId=abc | 400 | Zgodny |
+| UI-07 | Krótki tytuł w formularzu | Otworzyć nowe zadanie i wpisać ab | Czerwone pole z błędem, formularz nie zapisuje | Zgodny |
+| UI-08 | Widok komputera | Ustawić szerokość 1280 px | Brak poziomego przewijania | Zgodny |
+| UI-09 | Widok telefonu | Ustawić szerokość 390 px | Brak poziomego przewijania | Zgodny |
+| UI-10 | Przenoszenie myszą | Przeciągnąć zadanie do Gotowe i odczytać API | Status done w API | Zgodny |
+| UI-11 | Kosz | Usunąć testowe zadanie i pobrać kosz | Zadanie jest w koszu | Zgodny |
+| UI-12 | Przywrócenie | POST restore dla zadania z kosza | 204 | Zgodny |
+| UI-13 | Ostateczne usunięcie | Usunąć zadanie, następnie DELETE permanent | 204 i brak rekordu | Niezgodny: 500, konto bazy nie ma prawa DELETE |
+| UI-14 | Wylogowanie | Kliknąć Wyloguj | Przejście na login.html | Zgodny |
+| UI-15 | Widok bez sesji | Po wylogowaniu otworzyć boards.html | Przekierowanie na logowanie | Zgodny |
+| UI-16 | Błędy JavaScript | Rejestrować wyjątki podczas powyższych operacji | Brak nieobsłużonych wyjątków | Zgodny |
+
+Dodatkowo wykonano 13 testów obsługi walidacji tras (bez połączenia z bazą): błędny login, krótkie i zbyt długie hasło, puste imię, niewłaściwe typy, pusta nazwa tablicy, za długi opis, krótki tytuł, błędny priorytet, status, data i wykonawca. Wszystkie zwróciły 400 z informacją o polu; żadne nie dotarło do bazy.
+
+## Dostępność i HTML
+
+Lighthouse 12.8.2, Accessibility, 19.11.2026:
+
+| Widok | Wynik | Raport |
+| --- | --- | --- |
+| Logowanie | 100 | [login.html](audits/login.html) |
+| Lista tablic | 100 | [boards.html](audits/boards.html) |
+| Tablica | 96 | [board.html](audits/board.html) |
+
+Na tablicy Lighthouse zgłosił kontrast części elementów. Wszystkie widoki przekraczają wymagane 90 punktów. Raporty dotyczą zamkniętych okien formularzy.
+
+Trzy pliki HTML sprawdzono lokalnym Nu Html Checker 23.4.11 (walidator używany również przez W3C). Nie wysyłano kodu do zewnętrznego serwisu. Wynik: zero błędów. Wynik zapisano w [raporcie HTML](audits/html-validation.json).
+
+Uruchomienie z czystego klonu pozostaje do sprawdzenia po zapisaniu zmian w repozytorium.
+
+## Zgłoszenia do administratora — 19.11.2026
+
+Ostateczne usuwanie z UI-13 zastąpiono zgłoszeniem do administratora. Nie zmieniano praw konta MySQL aplikacji. Poniższe sprawdzenie wykonano w lokalnym Chrome na osobnej tablicy testowej. Po próbie zadanie przywrócono (anulując zgłoszenie), a tablicę testową usunięto miękko.
+
+| ID | Scenariusz | Kroki | Oczekiwany wynik | Wynik |
+| --- | --- | --- | --- | --- |
+| ADM-01 | Logowanie użytkownika | Zalogować zwykłe konto | 200 | Zgodny |
+| ADM-02 | Logowanie administratora | Zalogować osobne konto administratora | 200, role=admin w auth/me | Zgodny |
+| ADM-03 | Ochrona kolejki | GET admin/deletion-requests jako użytkownik | 403 | Zgodny |
+| ADM-04 | Zgłoszenie aktywnego zadania | POST deletion-request przed usunięciem | 409 | Zgodny |
+| ADM-05 | Zgłoszenie z kosza | Usunąć zadanie i wysłać deletion-request | 204 | Zgodny |
+| ADM-06 | Duplikat | Powtórzyć zgłoszenie | 409 | Zgodny |
+| ADM-07 | Zakaz zatwierdzania | DELETE permanent jako zwykły użytkownik | 403 | Zgodny |
+| ADM-08 | Zakaz odrzucania | POST reject jako zwykły użytkownik | 403 | Zgodny |
+| ADM-09 | Zawartość kolejki | GET kolejki jako administrator | Zawiera zadanie testowe | Zgodny |
+| ADM-10 | Panel administratora | Otworzyć admin.html | Widoczny tytuł zgłoszenia | Zgodny |
+| ADM-11 | Odrzucenie | POST reject jako administrator | 204 | Zgodny |
+| ADM-12 | Przywrócenie | Ponowić zgłoszenie i przywrócić zadanie | 204 | Zgodny |
+| ADM-13 | Anulowanie zgłoszenia | Odczytać kolejkę po przywróceniu | Nie zawiera zadania | Zgodny |
+| ADM-14 | Brak konfiguracji MySQL admina | Zgłosić zadanie i zatwierdzić bez ADMIN_DB_PASSWORD | 503, zgłoszenie pozostaje | Zgodny |
+| ADM-15 | Pełne zatwierdzenie | Skonfigurować konto MySQL administratora i zatwierdzić | 204 i fizyczne usunięcie | Zgodny: 204, potem GET zadania zwraca 404 |
+
+Lighthouse powtórzono po zmianach: logowanie 100, tablice 100, tablica 96, panel administratora 100.
+
+## Obserwator i układ kosza — 19.11.2026
+
+Sprawdzono nową rejestrację oraz zachowanie w Chrome. Tymczasowe konto obserwatora usunięto po teście. Dane testowej tablicy przywrócono i tablicę usunięto miękko.
+
+| ID | Scenariusz | Kroki | Oczekiwany wynik | Wynik |
+| --- | --- | --- | --- | --- |
+| ROLE-01 | Rola po rejestracji | Zarejestrować konto, wysyłając dodatkowo role=admin | auth/me zwraca viewer | Zgodny |
+| ROLE-02 | Zapis tablic | POST, PUT i DELETE tablicy jako viewer | Każde żądanie zwraca 403 | Zgodny |
+| ROLE-03 | Zapis zadań | POST, PUT i DELETE zadania jako viewer | Każde żądanie zwraca 403 | Zgodny |
+| ROLE-04 | Kosz i decyzje | Jako viewer wysłać restore, deletion-request i permanent | Każde żądanie zwraca 403 | Zgodny |
+| ROLE-05 | Interfejs zadania | Otworzyć tablicę i szczegóły jako viewer | Brak przeciągania i przycisków zapisu; pola szczegółów wyłączone | Zgodny |
+| ROLE-06 | Lista tablic | Otworzyć listę jako viewer | Brak dodawania i edycji | Zgodny |
+| ROLE-07 | Oczekujące zgłoszenie | Otworzyć kosz z oczekującą prośbą na 390 px | Status jest tekstową etykietą; brak poziomego przewijania | Zgodny |
+
+Wcześniejsze scenariusze zmian oznaczone jako wykonywane przez zwykłe konto dotyczą obecnej roli `editor`. Nowe konto `viewer` nie ma tych uprawnień.
