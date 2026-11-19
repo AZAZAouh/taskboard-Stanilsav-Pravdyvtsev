@@ -61,12 +61,13 @@ Lighthouse 12.8.2, Accessibility, 19.11.2026:
 | Logowanie | 100 | [login.html](audits/login.html) |
 | Lista tablic | 100 | [boards.html](audits/boards.html) |
 | Tablica | 96 | [board.html](audits/board.html) |
+| Panel administratora | 100 | [admin.html](audits/admin.html) |
 
 Na tablicy Lighthouse zgłosił kontrast części elementów. Wszystkie widoki przekraczają wymagane 90 punktów. Raporty dotyczą zamkniętych okien formularzy.
 
-Trzy pliki HTML sprawdzono lokalnym Nu Html Checker 23.4.11 (walidator używany również przez W3C). Nie wysyłano kodu do zewnętrznego serwisu. Wynik: zero błędów. Wynik zapisano w [raporcie HTML](audits/html-validation.json).
+Cztery pliki HTML sprawdzono lokalnym Nu Html Checker 23.4.11 (walidator używany również przez W3C). Nie wysyłano kodu do zewnętrznego serwisu. Wynik: zero błędów. Wynik zapisano w [raporcie HTML](audits/html-validation.json).
 
-Uruchomienie z czystego klonu pozostaje do sprawdzenia po zapisaniu zmian w repozytorium.
+Próbę czystego klonu wykonano 19.11.2026 z gałęzi `feature/tb-3-oddanie` pobranej z GitHub. W nowym katalogu zaimportowano kopię SQL do odizolowanej bazy, przygotowano `.env` ze wzoru, wykonano `npm ci` i uruchomiono serwer. Sprawdzono logowanie udokumentowanym kontem testowym, odczyt tablic, rejestrację, nadanie roli administratora, utworzenie zadania, zgłoszenie i zatwierdzenie fizycznego usunięcia. Wszystko zgodne. Tymczasową bazę, konta MySQL i testowy plik `.env` usunięto po próbie.
 
 ## Zgłoszenia do administratora — 19.11.2026
 
