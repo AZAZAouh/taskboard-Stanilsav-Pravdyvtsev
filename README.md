@@ -110,7 +110,7 @@ Są to konta z dołączonej bazy testowej. Można też utworzyć własne konto p
 - [Opis danych i ERD](docs/dane.md)
 - [Zadanie TB-3](docs/zadania/TB-3.md)
 
-Przeprowadzono testy w lokalnym Chrome, w tym filtry, zmianę statusu, kosz i widok 390 px. Lighthouse Accessibility: 100 / 100 / 96. HTML sprawdzono lokalnym Nu Html Checker bez błędów. Dokładny zakres i ograniczenia są w raporcie testów. Próba uruchomienia z czystego klonu jest jeszcze do wykonania.
+Przeprowadzono testy w lokalnym Chrome, w tym filtry, zmianę statusu, kosz i widok 390 px. Lighthouse Accessibility: 100 / 100 / 96 / 100. HTML sprawdzono lokalnym Nu Html Checker bez błędów. Dokładny zakres i ograniczenia są w raporcie testów. Uruchomienie z czystego klonu sprawdzono na oddzielnej bazie: import SQL, konfiguracja, npm ci, logowanie i obsługa zgłoszenia usunięcia zakończyły się poprawnie.
 
 ## Zrzuty ekranu
 
