@@ -69,7 +69,9 @@ CREATE TABLE `tasks` (
   `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
   `isDeleted` tinyint(1) NOT NULL DEFAULT 0,
   `deletedAt` datetime DEFAULT NULL,
-  `deletedById` int(10) UNSIGNED DEFAULT NULL
+  `deletedById` int(10) UNSIGNED DEFAULT NULL,
+  `purgeRequestedAt` datetime DEFAULT NULL,
+  `purgeRequestedById` int(10) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_polish_ci;
 
 --
@@ -100,6 +102,7 @@ CREATE TABLE `users` (
   `passwordHash` char(60) NOT NULL,
   `firstName` varchar(50) NOT NULL,
   `lastName` varchar(50) NOT NULL,
+  `role` enum('viewer','editor','admin') NOT NULL DEFAULT 'viewer',
   `createdAt` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -187,3 +190,6 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- Konta demonstracyjne służą do edycji; nowe rejestracje mają tylko podgląd.
+UPDATE users SET role = 'editor' WHERE login IN ('anna.nowak','jan.kowalski','ola.wisniewska','piotr.zielinski','kasia.lewandowska') AND role = 'viewer';
