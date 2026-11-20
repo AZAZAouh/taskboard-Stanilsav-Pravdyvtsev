@@ -56,7 +56,7 @@ Potrzebne są Git, Node.js z npm, XAMPP z MariaDB oraz przeglądarka. Bootstrap 
    cd taskboard-Stanilsav-Pravdyvtsev
    ```
 
-2. Włącz MySQL i Apache w XAMPP. Otwórz phpMyAdmin, utwórz bazę `taskboard` z kodowaniem `utf8mb4_polish_ci` i zaimportuj `database/backup/taskboard.sql`. Kopia zawiera strukturę i konta testowe aplikacji. Alternatywny `database/taskboard.sql` sam tworzy bazę, ale na początku usuwa poprzednią bazę o tej nazwie.
+2. Włącz MySQL i Apache w XAMPP. Otwórz phpMyAdmin, utwórz bazę `taskboard` z kodowaniem `utf8mb4_polish_ci` i zaimportuj `database/backup/taskboard-2026-11-20.sql`. Kopia zawiera strukturę i konta testowe aplikacji. Alternatywny `database/taskboard.sql` sam tworzy bazę, ale na początku usuwa poprzednią bazę o tej nazwie.
 
 3. W lokalnej kopii `database/konta.sql` zastąp hasła `ZMIEŃ_HASŁO_...` własnymi i wykonaj skrypt jako administrator bazy. Konto `taskboard_app` służy serwerowi, `taskboard_admin` ma szersze prawa administracyjne, a `taskboard_report` tylko odczyt. Własnych haseł nie zapisuj w commicie.
 
