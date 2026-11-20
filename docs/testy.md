@@ -2,7 +2,7 @@
 
 Adres API: `http://127.0.0.1:3000`
 
-Testy wykonujemy w Postmanie. W kolumnie „Wynik” wpisujemy „Zgodny” lub „Niezgodny” po wykonaniu testu.
+Kolekcja [Postman](postman/TaskBoard-TB-2.postman_collection.json) zawiera 25 zapytań. Uruchomiono ją 20.11.2026 przez Newman 6.2.1 na osobnej bazie i serwerze testowym. Wszystkie przypadki T-01–T-20 sprawdzono ponownie; liczba w kolumnie „Wynik” to otrzymany kod HTTP. Zapis wymaga konta z rolą `editor` lub `admin`.
 
 | ID | Scenariusz | Kroki | Oczekiwany wynik | Wynik |
 | --- | --- | --- | --- | --- |
@@ -11,21 +11,31 @@ Testy wykonujemy w Postmanie. W kolumnie „Wynik” wpisujemy „Zgodny” lub 
 | T-03 | Poprawne logowanie | `POST /api/auth/login` z poprawnym loginem i hasłem | `200`, dane użytkownika | Zgodny |
 | T-04 | Logowanie złym hasłem | `POST /api/auth/login` z poprawnym loginem i błędnym hasłem | `401`, komunikat o błędnym loginie lub haśle | Zgodny |
 | T-05 | Dane zalogowanego użytkownika | Po zalogowaniu wysłać `GET /api/auth/me` | `200`, ID, login, imię i nazwisko | Zgodny |
-| T-06 | Dane użytkownika bez sesji | Po wylogowaniu wysłać `GET /api/auth/me` | `401`, prośba o zalogowanie | — |
-| T-07 | Wylogowanie aktywnej sesji | Po zalogowaniu wysłać `POST /api/auth/logout` bez treści | `204`, sesja zakończona | — |
-| T-08 | Wylogowanie bez aktywnej sesji | Po T-07 ponownie wysłać `POST /api/auth/logout` | `204`, użytkownik nadal wylogowany | — |
-| T-09 | Lista zadań po zalogowaniu | `GET /api/boards/3/tasks` z aktywną sesją i ID istniejącej tablicy | `200`, lista zadań tablicy | — |
-| T-10 | Lista zadań bez logowania | Po wylogowaniu wysłać `GET /api/boards/3/tasks` | `401`, prośba o zalogowanie | — |
-| T-11 | Utworzenie tablicy | Po zalogowaniu wysłać `POST /api/boards` z nazwą i krótkim opisem | `201`, ID nowej tablicy | — |
-| T-12 | Za długi opis tablicy | Po zalogowaniu wysłać `POST /api/boards` z poprawną nazwą i opisem dłuższym niż 255 znaków | `400`, komunikat o długości opisu | — |
-| T-13 | Utworzenie zadania | Po zalogowaniu wysłać `POST /api/tasks` z tytułem i ID istniejącej tablicy | `201`, ID nowego zadania | — |
-| T-14 | Zadanie bez tytułu | Po zalogowaniu wysłać `POST /api/tasks` z pustym `title` i poprawnym `boardId` | `400`, komunikat o tytule | — |
-| T-15 | Szczegóły istniejącego zadania | Po zalogowaniu wysłać `GET /api/tasks/:id` z ID z T-13 | `200`, dane zadania | — |
-| T-16 | Szczegóły nieistniejącego zadania | Po zalogowaniu wysłać `GET /api/tasks/:id` z ID zadania, którego nie ma w bazie | `404`, komunikat o braku zadania | — |
-| T-17 | Zmiana istniejącego zadania | Po zalogowaniu wysłać `PUT /api/tasks/:id` z ID z T-13 i poprawnymi danymi | `200`, zaktualizowane dane | — |
-| T-18 | Zmiana nieistniejącego zadania | Po zalogowaniu wysłać `PUT /api/tasks/:id` z poprawnymi danymi i ID zadania, którego nie ma w bazie | `404`, komunikat o braku zadania | — |
-| T-19 | Usunięcie zadania testowego | Po zalogowaniu wysłać `DELETE /api/tasks/:id` z ID z T-13 | `204`, zadanie usunięte miękko | — |
-| T-20 | Ponowne usunięcie zadania | Po T-19 ponowić `DELETE /api/tasks/:id` z tym samym ID | `404`, komunikat o braku zadania | — |
+| T-06 | Dane użytkownika bez sesji | Po wylogowaniu wysłać `GET /api/auth/me` | `401`, prośba o zalogowanie | Zgodny (401) |
+| T-07 | Wylogowanie aktywnej sesji | Po zalogowaniu wysłać `POST /api/auth/logout` bez treści | `204`, sesja zakończona | Zgodny (204) |
+| T-08 | Wylogowanie bez aktywnej sesji | Po T-07 ponownie wysłać `POST /api/auth/logout` | `204`, użytkownik nadal wylogowany | Zgodny (204) |
+| T-09 | Lista zadań po zalogowaniu | `GET /api/boards/:boardId/tasks` z aktywną sesją i ID tablicy utworzonej przez kolekcję | `200`, lista zadań tablicy | Zgodny (200) |
+| T-10 | Lista zadań bez logowania | Po wylogowaniu wysłać `GET /api/boards/:boardId/tasks` | `401`, prośba o zalogowanie | Zgodny (401) |
+| T-11 | Utworzenie tablicy | Po zalogowaniu wysłać `POST /api/boards` z nazwą i krótkim opisem | `201`, ID nowej tablicy | Zgodny (201) |
+| T-12 | Za długi opis tablicy | Po zalogowaniu wysłać `POST /api/boards` z poprawną nazwą i opisem dłuższym niż 255 znaków | `400`, komunikat o długości opisu | Zgodny (400) |
+| T-13 | Utworzenie zadania | Po zalogowaniu wysłać `POST /api/tasks` z tytułem i ID istniejącej tablicy | `201`, ID nowego zadania | Zgodny (201) |
+| T-14 | Zadanie bez tytułu | Po zalogowaniu wysłać `POST /api/tasks` z pustym `title` i poprawnym `boardId` | `400`, komunikat o tytule | Zgodny (400) |
+| T-15 | Szczegóły istniejącego zadania | Po zalogowaniu wysłać `GET /api/tasks/:id` z ID z T-13 | `200`, dane zadania | Zgodny (200) |
+| T-16 | Szczegóły nieistniejącego zadania | Po zalogowaniu wysłać `GET /api/tasks/:id` z ID zadania, którego nie ma w bazie | `404`, komunikat o braku zadania | Zgodny (404) |
+| T-17 | Zmiana istniejącego zadania | Po zalogowaniu wysłać `PUT /api/tasks/:id` z ID z T-13 i poprawnymi danymi | `200`, zaktualizowane dane | Zgodny (200) |
+| T-18 | Zmiana nieistniejącego zadania | Po zalogowaniu wysłać `PUT /api/tasks/:id` z poprawnymi danymi i ID zadania, którego nie ma w bazie | `404`, komunikat o braku zadania | Zgodny (404) |
+| T-19 | Usunięcie zadania testowego | Po zalogowaniu wysłać `DELETE /api/tasks/:id` z ID z T-13 | `204`, zadanie usunięte miękko | Zgodny (204) |
+| T-20 | Ponowne usunięcie zadania | Po T-19 ponowić `DELETE /api/tasks/:id` z tym samym ID | `404`, komunikat o braku zadania | Zgodny (404) |
+
+## Weryfikacja poprawek — 20.11.2026
+
+Przywrócono `database/backup/taskboard-2026-11-20.sql` do osobnej, tymczasowej bazy. Przed testami zapytania COUNT(*) potwierdziły liczby rekordów: users = 5, boards = 3, tasks = 10, zgodne z danymi kopii.
+
+Newman wykonał 25 zapytań i 44 sprawdzenia odpowiedzi: wszystkie poprawne, bez błędów. Oprócz T-01–T-20 sprawdzono ponowne logowanie, pustą nazwę tablicy (400), listę tablic (200), edycję nieistniejącej tablicy (404) i usunięcie utworzonej tablicy (204).
+
+Kolekcja zapisuje ID nowej tablicy i zadania w zmiennych `boardId` i `taskId`. Dlatego do uruchomienia nie jest potrzebna istniejąca tablica o konkretnym numerze. Przypadki są wykonywane w kolejności zapisanej w kolekcji, tak aby logowanie i utworzenie danych poprzedzały zależne operacje.
+
+Po sprawdzeniu usunięto tymczasową bazę, konto MySQL i zakończono serwer testowy. Baza robocza `taskboard` nie była modyfikowana podczas tego uruchomienia.
 
 ## Sprawdzenie TB-3 — 19.11.2026
 
