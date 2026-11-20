@@ -62,7 +62,7 @@ CREATE TABLE `tasks` (
   `title` varchar(100) NOT NULL,
   `description` text DEFAULT NULL,
   `status` enum('todo','in_progress','done') NOT NULL DEFAULT 'todo',
-  `priority` enum('low','medium','high') NOT NULL,
+  `priority` enum('low','medium','high') NOT NULL DEFAULT 'medium',
   `deadline` date DEFAULT NULL,
   `boardId` int(10) UNSIGNED NOT NULL,
   `assigneeId` int(10) UNSIGNED DEFAULT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE `tasks` (
 
 INSERT INTO `tasks` (`id`, `title`, `description`, `status`, `priority`, `deadline`, `boardId`, `assigneeId`, `createdAt`, `isDeleted`, `deletedAt`, `deletedById`) VALUES
 (1, 'Test API zadan', NULL, 'todo', 'medium', NULL, 3, NULL, '2026-11-13 17:08:47', 0, NULL, NULL),
-(2, 'Test CRUD po zmianie', NULL, 'done', 'high', NULL, 3, NULL, '2026-11-13 17:19:51', 1, '2026-10-15 19:39:36', NULL),
+(2, 'Test CRUD po zmianie', NULL, 'done', 'high', NULL, 3, NULL, '2026-11-13 17:19:51', 1, '2026-11-13 17:19:51', NULL),
 (3, 'Test Postman po zmianie', NULL, 'done', 'high', NULL, 3, NULL, '2026-11-13 18:33:34', 1, '2026-11-13 18:33:35', NULL),
 (4, 'Przygotować makietę tablicy', NULL, 'todo', 'high', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
 (5, 'Dodać formularz zadania', NULL, 'in_progress', 'high', NULL, 3, NULL, '2026-11-15 19:39:36', 0, NULL, NULL),
