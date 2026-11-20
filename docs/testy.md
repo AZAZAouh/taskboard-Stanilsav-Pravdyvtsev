@@ -56,12 +56,14 @@ Dodatkowo wykonano 13 testów obsługi walidacji tras (bez połączenia z bazą)
 
 Lighthouse 12.8.2, Accessibility, 19.11.2026:
 
-| Widok | Wynik | Raport |
-| --- | --- | --- |
-| Logowanie | 100 | [login.html](audits/login.html) |
-| Lista tablic | 100 | [boards.html](audits/boards.html) |
-| Tablica | 96 | [board.html](audits/board.html) |
-| Panel administratora | 100 | [admin.html](audits/admin.html) |
+| Widok | Wynik |
+| --- | ---: |
+| Logowanie | 100 |
+| Lista tablic | 100 |
+| Tablica | 96 |
+| Panel administratora | 100 |
+
+Skrót wyników: [Sprawdzenie dostępności i HTML](audits/README.md).
 
 Na tablicy Lighthouse zgłosił kontrast części elementów. Wszystkie widoki przekraczają wymagane 90 punktów. Raporty dotyczą zamkniętych okien formularzy.
 
