@@ -1,6 +1,7 @@
 {
   "info": {
-    "name": "TaskBoard — TB-2 API zadań",
+    "name": "TaskBoard — auth, tablice i zadania",
+    "description": "25 zapytań: T-01–T-20 z docs/testy.md i 5 kroków pomocniczych dotyczących logowania oraz tablic. Uruchamiaj całą kolekcję po kolei. Postman przechowuje ciasteczko sesji. editorLogin musi mieć rolę editor lub admin; domyślnie anna.nowak. missingId musi wskazywać nieistniejący rekord. Tworzone są własne dane testowe; nie używamy istniejących tablic. Konto viewer i miękko usunięte rekordy pozostają po teście. Nie eksportuj prywatnych haseł.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -9,27 +10,152 @@
       "value": "http://127.0.0.1:3000"
     },
     {
-      "key": "boardId",
-      "value": "3"
+      "key": "editorLogin",
+      "value": "anna.nowak"
+    },
+    {
+      "key": "editorPassword",
+      "value": "Test1234!"
+    },
+    {
+      "key": "missingId",
+      "value": "4294967295"
     }
   ],
   "item": [
     {
-      "name": "Lista zadań tablicy",
+      "name": "T-01 — Rejestracja nowego użytkownika",
       "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/boards/{{boardId}}/tasks",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "boards",
-            "{{boardId}}",
-            "tasks"
-          ]
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{registrationLogin}}\",\n  \"password\": \"{{registrationPassword}}\",\n  \"firstName\": \"Postman\",\n  \"lastName\": \"Test\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Uruchamiaj całą kolekcję w Collection Runner po kolei, z włączonymi ciasteczkami. Rejestracja tworzy osobne konto viewer. Operacje edytora używają wyłącznie tablicy i zadania utworzonych w tym uruchomieniu. Konto testowe zostaje w bazie, zadanie i tablica są usuwane miękko na końcu."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "['boardId','taskId'].forEach(key => pm.collectionVariables.unset(key));",
+              "pm.collectionVariables.set('registrationLogin', 'pm_' + pm.variables.replaceIn('{{$guid}}').replace(/-/g, '').slice(0, 24));",
+              "pm.collectionVariables.set('registrationPassword', 'Pm_' + pm.variables.replaceIn('{{$guid}}'));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Bez hasha hasła\", () => pm.expect(pm.response.json()).not.to.have.property(\"passwordHash\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-02 — Rejestracja zajętego loginu",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{registrationLogin}}\",\n  \"password\": \"{{registrationPassword}}\",\n  \"firstName\": \"Postman\",\n  \"lastName\": \"Test\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-04 — Logowanie złym hasłem",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{editorLogin}}\",\n  \"password\": \"celowo-bledne-haslo\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-03 — Poprawne logowanie edytora",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{editorLogin}}\",\n  \"password\": \"{{editorPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
         }
       },
       "event": [
@@ -45,20 +171,11 @@
       ]
     },
     {
-      "name": "Lista użytkowników",
+      "name": "T-05 — Dane zalogowanego użytkownika",
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/users",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "users"
-          ]
-        }
+        "url": "{{baseUrl}}/api/auth/me"
       },
       "event": [
         {
@@ -67,14 +184,92 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
-              "pm.test('Bez passwordHash', () => pm.response.json().forEach(user => pm.expect(user).not.to.have.property('passwordHash')));"
+              "pm.test(\"Zalogowano edytora\", () => { const user = pm.response.json(); pm.expect(user.login).to.eql(pm.variables.get(\"editorLogin\")); pm.expect([\"editor\", \"admin\"]).to.include(user.role); pm.expect(user).not.to.have.property(\"passwordHash\"); });"
             ]
           }
         }
       ]
     },
     {
-      "name": "Dodaj zadanie",
+      "name": "T-07 — Wylogowanie aktywnej sesji",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/logout"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-08 — Wylogowanie bez aktywnej sesji",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/logout"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-06 — Dane użytkownika bez sesji",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-10 — Lista zadań bez logowania",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/boards/{{missingId}}/tasks"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logowanie przed operacjami edytora",
       "request": {
         "method": "POST",
         "header": [
@@ -83,19 +278,253 @@
             "value": "application/json"
           }
         ],
-        "url": {
-          "raw": "{{baseUrl}}/api/tasks",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "tasks"
-          ]
-        },
+        "url": "{{baseUrl}}/api/auth/login",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"Test Postman\",\n  \"priority\": \"medium\",\n  \"boardId\": {{boardId}}\n}",
+          "raw": "{\n  \"login\": \"{{editorLogin}}\",\n  \"password\": \"{{editorPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tablice — pusta nazwa (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/boards",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"   \"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-12 — Za długi opis tablicy",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/boards",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test walidacji\",\n  \"description\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-11 — Utworzenie osobnej tablicy testowej",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/boards",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Postman {{registrationLogin}}\",\n  \"description\": \"Tablica utworzona przez Collection Runner\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) { const id = pm.response.json().id; pm.test(\"ID tablicy\", () => pm.expect(id).to.be.a(\"number\").above(0)); pm.collectionVariables.set(\"boardId\", String(id)); }"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tablice — lista aktywnych (200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/boards"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Nowa tablica jest na liście\", () => pm.expect(pm.response.json().some(board => String(board.id) === pm.collectionVariables.get(\"boardId\"))).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tablice — edycja nieistniejącej (404)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/boards/{{missingId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-09 — Lista zadań po zalogowaniu",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/boards/{{boardId}}/tasks"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Lista zadań\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-14 — Nowe zadanie z pustym tytułem",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/tasks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"\",\"priority\":\"medium\",\"boardId\":{{boardId}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-13 — Dodaj zadanie testowe",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/tasks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\":\"Test Postman\",\"priority\":\"medium\",\"boardId\":{{boardId}}}",
           "options": {
             "raw": {
               "language": "json"
@@ -119,28 +548,18 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
-              "if (pm.response.code === 201) pm.collectionVariables.set('taskId', String(pm.response.json().id));"
+              "if (pm.response.code === 201) { const id = pm.response.json().id; pm.test(\"ID zadania\", () => pm.expect(id).to.be.a(\"number\").above(0)); pm.collectionVariables.set(\"taskId\", String(id)); }"
             ]
           }
         }
       ]
     },
     {
-      "name": "Szczegóły zadania",
+      "name": "T-15 — Szczegóły istniejącego zadania",
       "request": {
         "method": "GET",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/tasks/{{taskId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "tasks",
-            "{{taskId}}"
-          ]
-        }
+        "url": "{{baseUrl}}/api/tasks/{{taskId}}"
       },
       "event": [
         {
@@ -148,14 +567,35 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"ID utworzonego zadania\", () => pm.expect(String(pm.response.json().id)).to.eql(pm.collectionVariables.get(\"taskId\")));"
             ]
           }
         }
       ]
     },
     {
-      "name": "Edytuj zadanie",
+      "name": "T-16 — Szczegóły nieistniejącego zadania",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/tasks/{{missingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-17 — Edycja istniejącego zadania",
       "request": {
         "method": "PUT",
         "header": [
@@ -164,17 +604,7 @@
             "value": "application/json"
           }
         ],
-        "url": {
-          "raw": "{{baseUrl}}/api/tasks/{{taskId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "tasks",
-            "{{taskId}}"
-          ]
-        },
+        "url": "{{baseUrl}}/api/tasks/{{taskId}}",
         "body": {
           "mode": "raw",
           "raw": "{\n  \"title\": \"Test Postman po zmianie\",\n  \"priority\": \"high\",\n  \"status\": \"done\"\n}",
@@ -192,28 +622,52 @@
             "type": "text/javascript",
             "exec": [
               "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
-              "pm.test('Status zapisany', () => pm.expect(pm.response.json().status).to.eql('done'));"
+              "pm.test(\"Status i priorytet zapisane\", () => { const task = pm.response.json(); pm.expect(task.status).to.eql(\"done\"); pm.expect(task.priority).to.eql(\"high\"); });"
             ]
           }
         }
       ]
     },
     {
-      "name": "Usuń miękko zadanie testowe",
+      "name": "T-18 — Edycja nieistniejącego zadania",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/tasks/{{missingId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Test Postman po zmianie\",\n  \"priority\": \"high\",\n  \"status\": \"done\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "T-19 — Usuń miękko zadanie testowe",
       "request": {
         "method": "DELETE",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/tasks/{{taskId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "tasks",
-            "{{taskId}}"
-          ]
-        }
+        "url": "{{baseUrl}}/api/tasks/{{taskId}}"
       },
       "event": [
         {
@@ -228,21 +682,11 @@
       ]
     },
     {
-      "name": "Usunięte zadanie",
+      "name": "T-20 — Ponowne usunięcie tego samego zadania",
       "request": {
-        "method": "GET",
+        "method": "DELETE",
         "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/tasks/{{taskId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "tasks",
-            "{{taskId}}"
-          ]
-        }
+        "url": "{{baseUrl}}/api/tasks/{{taskId}}"
       },
       "event": [
         {
@@ -250,41 +694,19 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Komunikat błędu\", () => pm.expect(pm.response.json().error).to.be.a(\"string\").and.not.empty);"
             ]
           }
         }
       ]
     },
     {
-      "name": "Pusty tytuł",
+      "name": "Tablice — usuń miękko tablicę testową (204)",
       "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/tasks",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "tasks"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"\",\n  \"priority\": \"medium\",\n  \"boardId\": 3\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/boards/{{boardId}}"
       },
       "event": [
         {
@@ -292,91 +714,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Nieprawidłowy status",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/tasks",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "tasks"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Test Postman\",\n  \"priority\": \"medium\",\n  \"boardId\": 3,\n  \"status\": \"invalid\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "name": "Brak tablicy",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "url": {
-          "raw": "{{baseUrl}}/api/tasks",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "tasks"
-          ]
-        },
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Test Postman\",\n  \"priority\": \"medium\",\n  \"boardId\": 4294967295\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        }
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
             ]
           }
         }

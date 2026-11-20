@@ -24,13 +24,15 @@ UPDATE users SET role = 'admin' WHERE login = 'login_administratora';
 
 Rejestracja zawsze tworzy obserwatora (`viewer`) z prawem wyłącznie do podglądu. Edytor (`editor`) może tworzyć, edytować, przenosić, usuwać miękko i przywracać zadania oraz zgłaszać je administratorowi. Administrator (`admin`) ma również dostęp do rozpatrywania zgłoszeń. Pięć kont demonstracyjnych z materiałów ma rolę edytora.
 
+Konto `viewer` może przeglądać tablice i zadania oraz korzystać z filtrów. Przy próbie zapisu, zmiany statusu, usunięcia, przywrócenia lub zgłoszenia zadania API zwraca `403 Forbidden`. Uprawnienia są sprawdzane na serwerze, więc wysłanie żądania poza interfejsem także nie pozwala ominąć tego ograniczenia.
+
 Rolę edytora można nadać jako administrator bazy:
 
 ```sql
 UPDATE users SET role = 'editor' WHERE login = 'login_edytora';
 ```
 
- Zmiany roli nie można wykonać przez formularz ani podanie `role` w JSON. Panel znajduje się pod `/admin.html`; link pojawia się w nagłówku administratora.
+Zmiany roli nie można wykonać przez formularz ani podanie `role` w JSON. Panel znajduje się pod `/admin.html`; link pojawia się w nagłówku administratora.
 
 Do zatwierdzania usunięć uzupełnij lokalny `.env`:
 
@@ -56,7 +58,7 @@ Potrzebne są Git, Node.js z npm, XAMPP z MariaDB oraz przeglądarka. Bootstrap 
    cd taskboard-Stanilsav-Pravdyvtsev
    ```
 
-2. Włącz MySQL i Apache w XAMPP. Otwórz phpMyAdmin, utwórz bazę `taskboard` z kodowaniem `utf8mb4_polish_ci` i zaimportuj `database/backup/taskboard.sql`. Kopia zawiera strukturę i konta testowe aplikacji. Alternatywny `database/taskboard.sql` sam tworzy bazę, ale na początku usuwa poprzednią bazę o tej nazwie.
+2. Włącz MySQL i Apache w XAMPP. Otwórz phpMyAdmin, utwórz bazę `taskboard` z kodowaniem `utf8mb4_polish_ci` i zaimportuj `database/backup/taskboard-2026-11-20.sql`. Kopia zawiera strukturę i konta testowe aplikacji. Alternatywny `database/taskboard.sql` sam tworzy bazę, ale na początku usuwa poprzednią bazę o tej nazwie.
 
 3. W lokalnej kopii `database/konta.sql` zastąp hasła `ZMIEŃ_HASŁO_...` własnymi i wykonaj skrypt jako administrator bazy. Konto `taskboard_app` służy serwerowi, `taskboard_admin` ma szersze prawa administracyjne, a `taskboard_report` tylko odczyt. Własnych haseł nie zapisuj w commicie.
 
@@ -79,6 +81,60 @@ Potrzebne są Git, Node.js z npm, XAMPP z MariaDB oraz przeglądarka. Bootstrap 
 6. Otwórz [stronę logowania](http://127.0.0.1:3000/login.html). Serwer działa też pod `http://127.0.0.1:3000`, a `/api/health` zwraca `{"ok":true}`. Terminal serwera musi pozostać otwarty. Po zmianach backendu lub `.env` zatrzymaj serwer przez Ctrl+C i uruchom ponownie.
 
 Na Linux i macOS użyj `npm ci` i `npm start` zamiast poleceń z `.cmd`.
+
+## Odtworzenie kopii i porównanie liczby rekordów
+
+Do sprawdzenia kopii używamy osobnej bazy, aby nie nadpisać danych aplikacji.
+
+1. Zaloguj się w phpMyAdmin jako administrator MySQL. Utwórz nową, pustą bazę:
+
+   ```sql
+   CREATE DATABASE taskboard_restore_test
+     CHARACTER SET utf8mb4 COLLATE utf8mb4_polish_ci;
+   ```
+
+   Jeśli baza o tej nazwie już istnieje, wybierz inną nazwę i zmień ją w zapytaniach poniżej.
+
+2. Wybierz tę bazę w phpMyAdmin i w zakładce Import załaduj `database/backup/taskboard-2026-11-20.sql`. Ten plik tworzy tabele w wybranej bazie; nie przełącza jej na `taskboard`.
+
+3. Policz wszystkie rekordy, również usunięte miękko:
+
+   ```sql
+   SELECT 'users' AS tabela, COUNT(*) AS liczba
+   FROM taskboard_restore_test.users
+   UNION ALL
+   SELECT 'boards', COUNT(*) FROM taskboard_restore_test.boards
+   UNION ALL
+   SELECT 'tasks', COUNT(*) FROM taskboard_restore_test.tasks;
+   ```
+
+   Oczekiwane liczby wynikają z danych zapisanych w dołączonym pliku SQL:
+
+   | Tabela | Rekordy w kopii |
+   | --- | ---: |
+   | `users` | 5 |
+   | `boards` | 3 |
+   | `tasks` | 10 |
+
+4. Aby porównać bazę aplikacji z odtworzoną kopią, wykonaj:
+
+   ```sql
+   SELECT 'users' AS tabela,
+     (SELECT COUNT(*) FROM taskboard.users) AS baza_aplikacji,
+     (SELECT COUNT(*) FROM taskboard_restore_test.users) AS odtworzona_kopia
+   UNION ALL
+   SELECT 'boards',
+     (SELECT COUNT(*) FROM taskboard.boards),
+     (SELECT COUNT(*) FROM taskboard_restore_test.boards)
+   UNION ALL
+   SELECT 'tasks',
+     (SELECT COUNT(*) FROM taskboard.tasks),
+     (SELECT COUNT(*) FROM taskboard_restore_test.tasks);
+   ```
+
+   Liczby powinny się zgadzać, jeśli baza aplikacji nadal odpowiada stanowi kopii. Nowe konta i zadania albo ostateczne usunięcia po przygotowaniu kopii mogą powodować różnice. Dlatego wynik odtworzenia tej konkretnej kopii porównujemy także z tabelą 5 / 3 / 10 powyżej. Zgodna liczba rekordów sprawdza ich ilość, a nie identyczność całej zawartości.
+
+Ta sekcja opisuje sposób weryfikacji. Wynik nowej próby odtworzenia należy zapisać dopiero po jej wykonaniu.
 
 ## Konta testowe aplikacji
 
